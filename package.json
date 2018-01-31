@@ -1,5 +1,5 @@
 {
-  "name": "inversify-koa-utils",
+  "name": "inversify-koa",
   "version": "1.0.0",
   "description": "Some utilities for the development of koa applications with Inversify",
   "main": "lib/index.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diego-d5000/inversify-koa-utils"
+    "url": "git+https://github.com/raman-nbg/inversify-koa-utils"
   },
   "keywords": [
     "InversifyJS",
@@ -21,9 +21,9 @@
   "author": "Diego Plascencia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/diego-d5000/inversify-koa-utils/issues"
+    "url": "https://github.com/raman-nbg/inversify-koa-utils/issues"
   },
-  "homepage": "https://github.com/diego-d5000/inversify-koa-utils#readme",
+  "homepage": "https://github.com/raman-nbg/inversify-koa-utils#readme",
   "devDependencies": {
     "@types/body-parser": "^1.16.3",
     "@types/chai": "^4.0.1",
