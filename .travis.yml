@@ -1,13 +1,17 @@
 language: node_js
 node_js:
-- stable
-- 5.4.1
-- 5.4.0
-- 5.3.0
-- 5.2.0
-- 5.1.1
-- 4.4.6
+- node
 before_install:
 - npm install -g codeclimate-test-reporter
 after_success:
 - codeclimate-test-reporter < coverage/lcov.info
+deploy:
+  provider: npm
+  email: mail.raman.s@gmail.com
+  api_key:
+    secure: Kv65DRaBXyEh31J6toixzhTkJEa1LnxE9y7JeTv2ZZFGoGmJbdLIXELTJTKI+NH3ktS3hQx5hpAhMexE2ZHkGfiWKLa8cRgnWQd1ySflYfDb7coonwov8KMSHEl8KTe6VBOSbSb4d+Uoo8LgapvrFCiY9gwllSO/amnJ+WIfK+oIk4RI78yKLBOWrMsdoad0tjs5tY4BOU/v1Y387EIAEh76a1EoD+uO2S7rK0TRO8pWH7IRF3K8luhn/zcGqUvd9eygar21xSyeCidmG1ghCdpIlFpoTqCvUOGWMj6wOmQtMr/abnZYIevKX9b+U5jo5BwTQpQI2M3lay15oC3koB0H6Er8Y//dLTBerGXEnkXbr/1+BeWh8A+0vEYXe/Ymu5f1Ws1886nFzjRzoRLIlSKvPv8qnk+VvtM/JVJgc0Ulg47M8zFsl746YSqLXL6KlGFS0KS9QNxgQX8ozZEVs80QWwfkIc0ZxlyKPnFbtrNpOEzcbU6GuHNZLz8rvCDOxbXBvcrGX4H9Qs3KR22AbnwV4luVUmOIMWaDf7EPJWslFmE4ScNSXNnbULmagkqmzIdW19KzTybZe6sq8EojaSGrWQA9aa1WwJtfh72cB8d9vdy0PznVC0dt4M3ACkddmB5RAZJWNWMK0EKv0lNvQEupLHBk24/dxUdCdddyrZ0=
+  on:
+    tags: true
+    branch: master
+  skip_cleanup: true
+  tag: next

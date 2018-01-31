@@ -1,16 +1,14 @@
 # inversify-koa-utils
 
-[![inversify chat https://gitter.im/inversify/InversifyJS](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/inversify/InversifyJS?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://secure.travis-ci.org/diego-d5000/inversify-koa-utils.svg?branch=master)](https://travis-ci.org/diego-d5000/inversify-koa-utils)
-[![Test Coverage](https://codeclimate.com/github/diego-d5000/inversify-koa-utils/badges/coverage.svg)](https://codeclimate.com/github/diego-d5000/inversify-koa-utils/coverage)
-[![npm version](https://badge.fury.io/js/inversify-koa-utils.svg)](http://badge.fury.io/js/inversify-koa-utils)
-[![Dependencies](https://david-dm.org/diego-d5000/inversify-koa-utils.svg)](https://david-dm.org/diego-d5000/inversify-koa-utils#info=dependencies)
-[![img](https://david-dm.org/diego-d5000/inversify-koa-utils/dev-status.svg)](https://david-dm.org/diego-d5000/inversify-koa-utils/#info=devDependencies)
-[![img](https://david-dm.org/diego-d5000/inversify-koa-utils/peer-status.svg)](https://david-dm.org/diego-d5000/inversify-koa-utils/#info=peerDependenciess)
-[![Known Vulnerabilities](https://snyk.io/test/github/diego-d5000/inversify-koa-utils/badge.svg)](https://snyk.io/test/github/diego-d5000/inversify-koa-utils)
-
-[![NPM](https://nodei.co/npm/inversify-koa-utils.png?downloads=true&downloadRank=true)](https://nodei.co/npm/inversify-koa-utils/)
-[![NPM](https://nodei.co/npm-dl/inversify-koa-utils.png?months=9&height=3)](https://nodei.co/npm/inversify-koa-utils/)
+[![Build Status](https://secure.travis-ci.org/raman-nbg/inversify-koa-utils.svg?branch=master)](https://travis-ci.org/raman-nbg/inversify-koa-utils)
+[![Test Coverage](https://codeclimate.com/github/raman-nbg/inversify-koa-utils/badges/coverage.svg)](https://codeclimate.com/github/raman-nbg/inversify-koa-utils/coverage)
+[![npm version](https://badge.fury.io/js/inversify-koa.svg)](http://badge.fury.io/js/inversify-koa)
+[![Dependencies](https://david-dm.org/raman-nbg/inversify-koa-utils.svg)](https://david-dm.org/raman-nbg/inversify-koa-utils#info=dependencies)
+[![img](https://david-dm.org/raman-nbg/inversify-koa-utils/dev-status.svg)](https://david-dm.org/raman-nbg/inversify-koa-utils/#info=devDependencies)
+[![img](https://david-dm.org/raman-nbg/inversify-koa-utils/peer-status.svg)](https://david-dm.org/raman-nbg/inversify-koa-utils/#info=peerDependenciess)
+[![Known Vulnerabilities](https://snyk.io/test/github/raman-nbg/inversify-koa-utils/badge.svg?targetFile=package.json)](https://snyk.io/test/github/raman-nbg/inversify-koa-utils?targetFile=package.json)
+[![NPM](https://nodei.co/npm/inversify-koa.png?downloads=true&downloadRank=true)](https://nodei.co/npm/inversify-koa/)
+[![NPM](https://nodei.co/npm-dl/inversify-koa.png?months=9&height=3)](https://nodei.co/npm/inversify-koa/)
 
 inversify-koa-utils is a module based on [inversify-express-utils](https://github.com/inversify/inversify-express-utils). This module has utilities for koa 2 applications development using decorators and IoC Dependency Injection (with inversify)
 
