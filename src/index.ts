@@ -1,7 +1,7 @@
 import { InversifyKoaServer } from "./server";
 import { controller, httpMethod, httpGet, httpPut, httpPost, httpPatch,
         httpHead, all, httpDelete, request, response, requestParam, queryParam,
-        requestBody, requestHeaders, cookies, next } from "./decorators";
+        requestBody, requestHeaders, cookies, next, authorize, authorizeAll } from "./decorators";
 import { BaseMiddleware } from "./base_middleware";
 import { TYPE } from "./constants";
 import { interfaces } from "./interfaces";
@@ -27,5 +27,7 @@ export {
     requestHeaders,
     cookies,
     next,
-    BaseMiddleware
+    BaseMiddleware,
+    authorize,
+    authorizeAll
 };
