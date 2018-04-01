@@ -1,4 +1,4 @@
-# inversify-koa-utils
+# inversify-koa
 
 [![Build Status](https://secure.travis-ci.org/raman-nbg/inversify-koa-utils.svg?branch=master)](https://travis-ci.org/raman-nbg/inversify-koa-utils)
 [![Test Coverage](https://codeclimate.com/github/raman-nbg/inversify-koa-utils/badges/coverage.svg)](https://codeclimate.com/github/raman-nbg/inversify-koa-utils/coverage)
@@ -10,16 +10,16 @@
 [![NPM](https://nodei.co/npm/inversify-koa.png?downloads=true&downloadRank=true)](https://nodei.co/npm/inversify-koa/)
 [![NPM](https://nodei.co/npm-dl/inversify-koa.png?months=9&height=3)](https://nodei.co/npm/inversify-koa/)
 
-inversify-koa-utils is a module based on [inversify-express-utils](https://github.com/inversify/inversify-express-utils). This module has utilities for koa 2 applications development using decorators and IoC Dependency Injection (with inversify)
+inversify-koa is a module based on [inversify-express-utils](https://github.com/inversify/inversify-express-utils). This module has utilities for koa 2 applications development using decorators and IoC Dependency Injection (with inversify)
 
 ## Installation
-You can install `inversify-koa-utils` using npm:
+You can install `inversify-koa` using npm:
 
 ```
-$ npm install inversify inversify-koa-utils reflect-metadata --save
+$ npm install inversify inversify-koa reflect-metadata --save
 ```
 
-The `inversify-koa-utils` type definitions are included in the npm module and require TypeScript 2.0.
+The `inversify-koa` type definitions are included in the npm module and require TypeScript 2.0.
 Please refer to the [InversifyJS documentation](https://github.com/inversify/InversifyJS#installation) to learn more about the installation process.
 
 ## The Basics
@@ -30,7 +30,7 @@ The following example will declare a controller that responds to `GET /foo'.
 
 ```ts
 import * as Koa from 'koa';
-import { interfaces, Controller, Get, Post, Delete } from 'inversify-koa-utils';
+import { interfaces, Controller, Get, Post, Delete } from 'inversify-koa';
 import { injectable, inject } from 'inversify';
 
 @controller('/foo')
@@ -92,13 +92,13 @@ Then, pass the container to the InversifyKoaServer constructor. This will allow 
 Then just call server.build() to prepare your app.
 
 In order for the InversifyKoaServer to find your controllers, you must bind them to the `TYPE.Controller` service identifier and tag the binding with the controller's name.
-The `Controller` interface exported by inversify-koa-utils is empty and solely for convenience, so feel free to implement your own if you want.
+The `Controller` interface exported by inversify-koa is empty and solely for convenience, so feel free to implement your own if you want.
 
 ```ts
 import * as bodyParser from 'koa-bodyparser';
 
 import { Container } from 'inversify';
-import { interfaces, InversifyKoaServer, TYPE } from 'inversify-koa-utils';
+import { interfaces, InversifyKoaServer, TYPE } from 'inversify-koa';
 
 // set up container
 let container = new Container();
@@ -264,7 +264,7 @@ The `AuthProvider` allow us to get an user (`Principal`):
 ```ts
 import * as Router from "koa-router";
 import { injectable, inject } from "inversify";
-import { interfaces } from "inversify-koa-utils";
+import { interfaces } from "inversify-koa";
 
 const authService = inject("AuthService");
 
@@ -351,7 +351,7 @@ Extending `BaseMiddleware` allow us to inject dependencies
 in Koa middleware function.
 
 ```ts
-import { BaseMiddleware } from "inversify-koa-utils";
+import { BaseMiddleware } from "inversify-koa";
 
 @injectable()
 class LoggerMiddleware extends BaseMiddleware {
