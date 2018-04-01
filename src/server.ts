@@ -146,8 +146,11 @@ export class InversifyKoaServer {
                         authorizationHandler.push(this.authorizationHandlerFactory(requiredRoles));
                     }
                     if (authorizeMetadata) {
-                        let requiredRoles = authorizeMetadata[metadata.key].requiredRoles;
-                        authorizationHandler.push(this.authorizationHandlerFactory(requiredRoles));
+                        let authorizedMetadataForMethod = authorizeMetadata[metadata.key];
+                        if (authorizedMetadataForMethod !== undefined) {
+                            let requiredRoles = authorizedMetadataForMethod.requiredRoles;
+                            authorizationHandler.push(this.authorizationHandlerFactory(requiredRoles));
+                        }
                     }
 
                     let handler = this.handlerFactory(controllerMetadata.target.name, metadata.key, paramList);

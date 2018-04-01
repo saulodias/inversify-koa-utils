@@ -1112,6 +1112,46 @@ describe("Integration Tests:", () => {
                 .get("/foo")
                 .expect(200, "foo", done);
         });
+
+        it("should protected metohd which is annotated with @authorize but not method in same controller without @authorize", (done) => {
+            @injectable()
+            class TestAuthProvider implements interfaces.AuthProvider {
+                public getPrincipal(ctx: Router.IRouterContext): Promise<interfaces.Principal> {
+                    let principal: interfaces.Principal = {
+                        details: null,
+                        isAuthenticated: () => Promise.resolve(false),
+                        isInRole: (role: string) => Promise.resolve(false),
+                        isResourceOwner: (resourceId: any) => Promise.resolve(false)
+                    };
+                    return Promise.resolve(principal);
+                }
+            }
+
+            @injectable()
+            @controller("/")
+            class TestController {
+                @httpGet(":id")
+                @authorize()
+                public getTest( @requestParam("id") id: string, ctx: Router.IRouterContext) {
+                    return id;
+                }
+
+                @httpGet("")
+                public getAll(ctx: Router.IRouterContext) {
+                    return "response";
+                }
+            }
+            container.bind<interfaces.Controller>(TYPE.Controller).to(TestController).whenTargetNamed("TestController");
+
+            server = new InversifyKoaServer(container, null, null, null, TestAuthProvider);
+            let serverTest = supertest(server.build().listen());
+            serverTest
+                .get("/foo")
+                .expect(401, "foo");
+            serverTest
+                .get("/")
+                .expect(200, "response", done);
+        });
     });
 
 });
