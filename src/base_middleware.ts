@@ -1,11 +1,10 @@
 import { injectable } from "inversify";
-import * as Router from "koa-router";
-import { interfaces } from "./interfaces";
+import { RouterContext } from "koa-router";
 
 @injectable()
 export abstract class BaseMiddleware implements BaseMiddleware {
     public abstract handler(
-        ctx: Router.IRouterContext,
+        ctx: RouterContext,
         next: () => Promise<any>
     ): any;
 }

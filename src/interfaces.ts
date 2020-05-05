@@ -1,5 +1,5 @@
 import * as Koa from "koa";
-import * as Router from "koa-router";
+import { RouterContext } from "koa-router";
 import { interfaces as inversifyInterfaces } from "inversify";
 import { PARAMETER_TYPE } from "./constants";
 
@@ -52,7 +52,7 @@ namespace interfaces {
     }
 
     export interface KoaRequestHandler {
-        (ctx: Router.IRouterContext, next: () => Promise<any>): any;
+        (ctx: RouterContext, next: () => Promise<any>): any;
     }
 
     export interface Principal {
@@ -65,7 +65,7 @@ namespace interfaces {
     }
 
     export interface AuthProvider {
-        getPrincipal(ctx: Router.IRouterContext): Promise<Principal>;
+        getPrincipal(ctx: RouterContext): Promise<Principal>;
     }
 
 }

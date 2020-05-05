@@ -76,7 +76,7 @@ export class InversifyKoaServer {
         const _self = this;
 
         // at very first middleware set the principal to the context state
-        this._app.use(async (ctx: Router.IRouterContext, next: () => Promise<any>) => {
+        this._app.use(async (ctx: Router.RouterContext, next: () => Promise<any>) => {
             ctx.state.principal = await _self._getCurrentPrincipal(ctx);
             await next();
         });
@@ -170,7 +170,7 @@ export class InversifyKoaServer {
     }
 
     private authorizationHandlerFactory(requiredRoles: string[]): interfaces.KoaRequestHandler {
-            return async (ctx: Router.IRouterContext, next: () => Promise<any>) => {
+            return async (ctx: Router.RouterContext, next: () => Promise<any>) => {
                 let isAuthenticated = false;
                 let isAuthorized = false;
 
@@ -209,7 +209,7 @@ export class InversifyKoaServer {
 
                 if (middlewareInstance instanceof BaseMiddleware) {
                     const _self = this;
-                    return function(ctx: Router.IRouterContext, next: () => Promise<any>) {
+                    return function(ctx: Router.RouterContext, next: () => Promise<any>) {
                         return middlewareInstance.handler(ctx, next);
                     };
                 } else {
@@ -225,7 +225,7 @@ export class InversifyKoaServer {
     private handlerFactory(controllerName: any, key: string,
         parameterMetadata: interfaces.ParameterMetadata[]): interfaces.KoaRequestHandler {
         // this function works like another top middleware to extract and inject arguments
-        return async (ctx: Router.IRouterContext, next: () => Promise<any>) => {
+        return async (ctx: Router.RouterContext, next: () => Promise<any>) => {
             let args = this.extractParameters(ctx, next, parameterMetadata);
             let result: any = await this._container.getNamed(TYPE.Controller, controllerName)[key](...args);
 
@@ -238,7 +238,7 @@ export class InversifyKoaServer {
         };
     }
 
-    private extractParameters(ctx: Router.IRouterContext, next: () => Promise<any>,
+    private extractParameters(ctx: Router.RouterContext, next: () => Promise<any>,
         params: interfaces.ParameterMetadata[]): any[] {
         let args = [];
         if (!params || !params.length) {
@@ -279,7 +279,7 @@ export class InversifyKoaServer {
         }
     }
 
-    private async _getCurrentPrincipal(ctx: Router.IRouterContext): Promise<interfaces.Principal> {
+    private async _getCurrentPrincipal(ctx: Router.RouterContext): Promise<interfaces.Principal> {
         if (this._AuthProvider !== undefined) {
             const authProvider = this._container.get<interfaces.AuthProvider>(TYPE.AuthProvider);
             return await authProvider.getPrincipal(ctx);
