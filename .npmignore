@@ -20,3 +20,5 @@ wallaby.js
 .gitignore
 .vscode
 type_definitions
+.git
+mochawesome-report

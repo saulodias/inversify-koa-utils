@@ -40,12 +40,12 @@ export class FooController implements interfaces.Controller {
     constructor( @inject('FooService') private fooService: FooService ) {}
 
     @httpGet('/')
-    private index(ctx: Router.IRouterContext , next: () => Promise<any>): string {
+    private index(ctx: Router.RouterContext , next: () => Promise<any>): string {
         return this.fooService.get(ctx.query.id);
     }
 
     @httpGet('/basickoacascading')
-    private koacascadingA(ctx: Router.IRouterContext, nextFunc: () => Promise<any>): string {
+    private koacascadingA(ctx: Router.RouterContext, nextFunc: () => Promise<any>): string {
         const start = new Date();
         await nextFunc();
         const ms = new Date().valueOf() - start.valueOf();
@@ -53,7 +53,7 @@ export class FooController implements interfaces.Controller {
     }
 
     @httpGet('/basickoacascading')
-    private koacascadingB(ctx: Router.IRouterContext , next: () => Promise<any>): string {
+    private koacascadingB(ctx: Router.RouterContext , next: () => Promise<any>): string {
         ctx.body = "Hello World";
     }
 
@@ -167,7 +167,7 @@ It is possible to pass a custom `Router` instance to `InversifyKoaServer`:
 
 ```ts
 
-import * as Router from 'koa-router';
+import * as Router from '@koa/router';
 
 let container = new Container();
 
@@ -262,7 +262,7 @@ We need to implement the `AuthProvider` interface.
 The `AuthProvider` allow us to get an user (`Principal`):
 
 ```ts
-import * as Router from "koa-router";
+import * as Router from "@koa/router";
 import { injectable, inject } from "inversify";
 import { interfaces } from "inversify-koa";
 
@@ -273,7 +273,7 @@ class CustomAuthProvider implements interfaces.AuthProvider {
 
     @authService private readonly _authService: AuthService;
 
-    public async getUser(ctx: Router.IRouterContext): Promise<interfaces.Principal> {
+    public async getUser(ctx: Router.RouterContext): Promise<interfaces.Principal> {
         const token = req.headers["x-auth-token"]
         const user = await this._authService.getUser(token);
         const principal = new Principal(user);
@@ -318,7 +318,7 @@ class UserDetailsController extends BaseHttpController {
     @inject("AuthService") private readonly _authService: AuthService;
 
     @httpGet("/")
-    public async getUserDetails(@context() ctx: Router.IRouterContext) {
+    public async getUserDetails(@context() ctx: Router.RouterContext) {
         if (await this.context.principal.isAuthenticated()) {
             return this._authService.getUserDetails(this.context.principal.details.id);
         } else {
@@ -338,7 +338,7 @@ class UserDetailsController extends BaseHttpController {
 
     @httpGet("/")
     @authorize()
-    public async getUserDetails(@context() ctx: Router.IRouterContext) {
+    public async getUserDetails(@context() ctx: Router.RouterContext) {
         let isAuthorized = await this.context.principal.isAuthenticated();
         // isAuthorized will always be true
     }

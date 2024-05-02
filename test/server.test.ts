@@ -1,28 +1,26 @@
-// test libraries
 import { expect } from "chai";
-import * as sinon from "sinon";
+import sinon from "sinon";
 
-// dependencies
-import * as Koa from "koa";
-import * as Router from "koa-router";
-import { InversifyKoaServer } from "../src/server";
+import Router, { RouterContext } from "@koa/router";
 import { Container, injectable } from "inversify";
-import { TYPE } from "../src/constants";
-import { interfaces } from "../src/interfaces";
+import Koa from "koa";
+import { TYPE } from "../src/constants.js";
+import { AuthProvider, Principal } from "../src/interfaces.js";
+import { InversifyKoaServer } from "../src/server.js";
 
 describe("Unit Test: InversifyKoaServer", () => {
 
     it("should call the configFn before the errorConfigFn", (done) => {
-        let middleware = function(ctx: Router.IRouterContext, next: () => Promise<any>) { return; };
-        let configFn = sinon.spy((app: Koa) => { app.use(middleware); });
-        let errorConfigFn = sinon.spy((app: Koa) => { app.use(middleware); });
-        let container = new Container();
+        const middleware = function (ctx: RouterContext, next: () => Promise<any>) { return; };
+        const configFn = sinon.spy((app: Koa) => { app.use(middleware); });
+        const errorConfigFn = sinon.spy((app: Koa) => { app.use(middleware); });
+        const container = new Container();
 
         @injectable()
-        class TestController {}
+        class TestController { }
 
         container.bind(TYPE.Controller).to(TestController);
-        let server = new InversifyKoaServer(container);
+        const server = new InversifyKoaServer(container);
 
         server.setConfig(configFn)
             .setErrorConfig(errorConfigFn);
@@ -40,13 +38,13 @@ describe("Unit Test: InversifyKoaServer", () => {
 
     it("Should allow to pass a custom Router instance as config", () => {
 
-        let container = new Container();
+        const container = new Container();
 
-        let customRouter = new Router({
+        const customRouter = new Router({
         });
 
-        let serverWithDefaultRouter = new InversifyKoaServer(container);
-        let serverWithCustomRouter = new InversifyKoaServer(container, customRouter);
+        const serverWithDefaultRouter = new InversifyKoaServer(container);
+        const serverWithCustomRouter = new InversifyKoaServer(container, customRouter);
 
         expect((serverWithDefaultRouter as any)._router === customRouter).to.eq(false);
         expect((serverWithCustomRouter as any)._router === customRouter).to.eqls(true);
@@ -55,14 +53,14 @@ describe("Unit Test: InversifyKoaServer", () => {
 
     it("Should allow to provide custom routing configuration", () => {
 
-        let container = new Container();
+        const container = new Container();
 
-        let routingConfig = {
+        const routingConfig = {
             rootPath: "/such/root/path"
         };
 
-        let serverWithDefaultConfig = new InversifyKoaServer(container);
-        let serverWithCustomConfig = new InversifyKoaServer(container, null, routingConfig);
+        const serverWithDefaultConfig = new InversifyKoaServer(container);
+        const serverWithCustomConfig = new InversifyKoaServer(container, null, routingConfig);
 
         expect((serverWithCustomConfig as any)._routingConfig).to.eq(routingConfig);
         expect((serverWithDefaultConfig as any)._routingConfig).to.not.eql(
@@ -72,12 +70,12 @@ describe("Unit Test: InversifyKoaServer", () => {
     });
 
     it("Should allow to provide a custom Koa application", () => {
-        let container = new Container();
+        const container = new Container();
 
-        let app = new Koa();
+        const app = new Koa();
 
-        let serverWithDefaultApp = new InversifyKoaServer(container);
-        let serverWithCustomApp = new InversifyKoaServer(container, null, null, app);
+        const serverWithDefaultApp = new InversifyKoaServer(container);
+        const serverWithCustomApp = new InversifyKoaServer(container, null, null, app);
 
         expect((serverWithCustomApp as any)._app).to.eq(app);
         // deeply equal causes error with property URL
@@ -85,14 +83,19 @@ describe("Unit Test: InversifyKoaServer", () => {
     });
 
     it("Should allow to provide a auth provider", () => {
-        class MyAuthProvider implements interfaces.AuthProvider {
-            public getPrincipal(ctx: Router.IRouterContext): Promise<interfaces.Principal> {
-                return Promise.resolve(null);
+        class MyAuthProvider implements AuthProvider {
+            public getPrincipal(ctx: RouterContext): Promise<Principal> {
+                return Promise.resolve({
+                    details: null,
+                    isAuthenticated: () => Promise.resolve(false),
+                    isInRole: (role: string) => Promise.resolve(false),
+                    isResourceOwner: (resourceId: any) => Promise.resolve(false)
+                });
             }
         }
-        let container = new Container();
+        const container = new Container();
 
-        let server = new InversifyKoaServer(container, null, null, null, MyAuthProvider);
+        const server = new InversifyKoaServer(container, null, null, null, MyAuthProvider);
 
         expect((server as any)._AuthProvider).to.eq(MyAuthProvider);
     });

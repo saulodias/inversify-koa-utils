@@ -1,17 +1,25 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "lib": ["es6", "dom"],
-        "types": ["koa", "inversify", "mocha", "reflect-metadata"],
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "isolatedModules": false,
-        "jsx": "react",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "noImplicitAny": true,
-        "preserveConstEnums": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "outDir": "lib"
-    }
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es6", "dom"],
+    "types": ["koa", "inversify", "mocha", "reflect-metadata"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "isolatedModules": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noImplicitAny": true,
+    "preserveConstEnums": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+    "sourceMap": true,
+    "rootDir": "./",
+    "outDir": "./dist"
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules/**"]
 }

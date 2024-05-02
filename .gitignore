@@ -37,6 +37,7 @@ node_modules
 bower_components
 docs
 bundled
+mochawesome-report
 
 typings
 .typingsrc

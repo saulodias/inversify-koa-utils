@@ -1,8 +1,10 @@
+import "reflect-metadata";
+
+import { RouterContext } from "@koa/router";
 import { injectable } from "inversify";
-import { RouterContext } from "koa-router";
 
 @injectable()
-export abstract class BaseMiddleware implements BaseMiddleware {
+export abstract class BaseMiddleware {
     public abstract handler(
         ctx: RouterContext,
         next: () => Promise<any>

@@ -1,33 +1,36 @@
-import { InversifyKoaServer } from "./server";
-import { controller, httpMethod, httpGet, httpPut, httpPost, httpPatch,
-        httpHead, all, httpDelete, request, response, requestParam, queryParam,
-        requestBody, requestHeaders, cookies, next, authorize, authorizeAll } from "./decorators";
-import { BaseMiddleware } from "./base_middleware";
-import { TYPE } from "./constants";
-import { interfaces } from "./interfaces";
+import { BaseMiddleware } from "./base_middleware.js";
+import { TYPE } from "./constants.js";
+import {
+    all,
+    authorize, authorizeAll,
+    controller,
+    cookies,
+    httpDelete,
+    httpGet,
+    httpHead,
+    httpMethod,
+    httpPatch,
+    httpPost,
+    httpPut,
+    next,
+    queryParam,
+    request,
+    requestBody, requestHeaders,
+    requestParam,
+    response
+} from "./decorators.js";
+
+import {
+    AuthProvider, AuthorizeAllMetadata, AuthorizeMetadata, Controller, ControllerMetadata, ControllerMethodMetadata,
+    ControllerParameterMetadata, Middleware, ParameterMetadata, Principal, RoutingConfig
+} from "./interfaces.js";
+
+import { InversifyKoaServer } from "./server.js";
 
 export {
-    interfaces,
-    InversifyKoaServer,
-    controller,
-    httpMethod,
-    httpGet,
-    httpPut,
-    httpPost,
-    httpPatch,
-    httpHead,
-    all,
-    httpDelete,
-    TYPE,
-    request,
-    response,
-    requestParam,
-    queryParam,
-    requestBody,
-    requestHeaders,
-    cookies,
-    next,
-    BaseMiddleware,
-    authorize,
-    authorizeAll
+    AuthProvider, AuthorizeAllMetadata, AuthorizeMetadata, BaseMiddleware, Controller, ControllerMetadata, ControllerMethodMetadata,
+    ControllerParameterMetadata, InversifyKoaServer, Middleware, ParameterMetadata, Principal, RoutingConfig, TYPE, all, authorize,
+    authorizeAll, controller, cookies, httpDelete, httpGet, httpHead, httpMethod, httpPatch, httpPost, httpPut, next, queryParam, request, requestBody,
+    requestHeaders, requestParam, response
 };
+

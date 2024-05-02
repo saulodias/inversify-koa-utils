@@ -1,9 +1,10 @@
-import * as Koa from "koa";
-import * as Router from "koa-router";
-import * as inversify from "inversify";
-import { interfaces } from "./interfaces";
-import { TYPE, METADATA_KEY, DEFAULT_ROUTING_ROOT_PATH, PARAMETER_TYPE } from "./constants";
-import { BaseMiddleware } from "./base_middleware";
+import Router from "@koa/router";
+import inversify from "inversify";
+import Koa from "koa";
+import { BaseMiddleware } from "./base_middleware.js";
+import { DEFAULT_ROUTING_ROOT_PATH, METADATA_KEY, PARAMETER_TYPE, TYPE } from "./constants.js";
+import { AuthProvider, AuthorizeAllMetadata, AuthorizeMetadata, ConfigFunction, Controller, ControllerMetadata, ControllerMethodMetadata, ControllerParameterMetadata, KoaRequestHandler, Middleware, ParameterMetadata, Principal, RoutingConfig } from "./interfaces.js";
+import pathJoin from "./utils.js";
 
 /**
  * Wrapper for the koa server.
@@ -11,12 +12,12 @@ import { BaseMiddleware } from "./base_middleware";
 export class InversifyKoaServer {
 
     private _router: Router;
-    private _container: inversify.interfaces.Container;
+    private _container: inversify.Container;
     private _app: Koa;
-    private _configFn: interfaces.ConfigFunction;
-    private _errorConfigFn: interfaces.ConfigFunction;
-    private _routingConfig: interfaces.RoutingConfig;
-    private _AuthProvider: { new(): interfaces.AuthProvider};
+    private _configFn: ConfigFunction = () => { };
+    private _errorConfigFn: ConfigFunction = () => { };
+    private _routingConfig: RoutingConfig;
+    private _AuthProvider: { new(): AuthProvider } | null = null;
 
     /**
      * Wrapper for the koa server.
@@ -24,11 +25,11 @@ export class InversifyKoaServer {
      * @param container Container loaded with all controllers and their dependencies.
      */
     constructor(
-        container: inversify.interfaces.Container,
-        customRouter?: Router,
-        routingConfig?: interfaces.RoutingConfig,
-        customApp?: Koa,
-        authProvider?: { new(): interfaces.AuthProvider} | null
+        container: inversify.Container,
+        customRouter?: Router | null,
+        routingConfig?: RoutingConfig | null,
+        customApp?: Koa | null,
+        authProvider?: { new(): AuthProvider } | null
     ) {
         this._container = container;
         this._router = customRouter || new Router();
@@ -38,8 +39,8 @@ export class InversifyKoaServer {
         this._app = customApp || new Koa();
         if (authProvider) {
             this._AuthProvider = authProvider;
-            container.bind<interfaces.AuthProvider>(TYPE.AuthProvider)
-                     .to(this._AuthProvider);
+            container.bind<AuthProvider>(TYPE.AuthProvider)
+                .to(this._AuthProvider);
         }
     }
 
@@ -51,7 +52,7 @@ export class InversifyKoaServer {
      *
      * @param fn Function in which app-level middleware can be registered.
      */
-    public setConfig(fn: interfaces.ConfigFunction): InversifyKoaServer {
+    public setConfig(fn: ConfigFunction): InversifyKoaServer {
         this._configFn = fn;
         return this;
     }
@@ -64,7 +65,7 @@ export class InversifyKoaServer {
      *
      * @param fn Function in which app-level error handlers can be registered.
      */
-    public setErrorConfig(fn: interfaces.ConfigFunction): InversifyKoaServer {
+    public setErrorConfig(fn: ConfigFunction): InversifyKoaServer {
         this._errorConfigFn = fn;
         return this;
     }
@@ -102,61 +103,62 @@ export class InversifyKoaServer {
             this._router.prefix(this._routingConfig.rootPath);
         }
 
-        let controllers: interfaces.Controller[] = this._container.getAll<interfaces.Controller>(TYPE.Controller);
+        const controllers: Controller[] = this._container.getAll<Controller>(TYPE.Controller);
 
-        controllers.forEach((controller: interfaces.Controller) => {
+        controllers.forEach((controller: Controller) => {
 
-            let controllerMetadata: interfaces.ControllerMetadata = Reflect.getOwnMetadata(
+            const controllerMetadata: ControllerMetadata = Reflect.getOwnMetadata(
                 METADATA_KEY.controller,
                 controller.constructor
             );
 
-            let methodMetadata: interfaces.ControllerMethodMetadata[] = Reflect.getOwnMetadata(
+            const methodMetadata: ControllerMethodMetadata[] = Reflect.getOwnMetadata(
                 METADATA_KEY.controllerMethod,
                 controller.constructor
             );
 
-            let parameterMetadata: interfaces.ControllerParameterMetadata = Reflect.getOwnMetadata(
+            const parameterMetadata: ControllerParameterMetadata = Reflect.getOwnMetadata(
                 METADATA_KEY.controllerParameter,
                 controller.constructor
             );
 
-            let authorizeAllMetadata: interfaces.AuthorizeAllMetadata = Reflect.getOwnMetadata(
+            const authorizeAllMetadata: AuthorizeAllMetadata = Reflect.getOwnMetadata(
                 METADATA_KEY.authorizeAll,
                 controller.constructor
             );
 
-            let authorizeMetadata: interfaces.AuthorizeMetadata[] = Reflect.getOwnMetadata(
+            const authorizeMetadata: Record<string, AuthorizeMetadata> = Reflect.getOwnMetadata(
                 METADATA_KEY.authorize,
                 controller.constructor
             );
 
             if (controllerMetadata && methodMetadata) {
-                let controllerMiddleware = this.resolveMiddleware(...controllerMetadata.middleware);
+                const controllerMiddleware = this.resolveMiddleware(...controllerMetadata.middleware);
 
-                methodMetadata.forEach((metadata: interfaces.ControllerMethodMetadata) => {
-                    let paramList: interfaces.ParameterMetadata[] = [];
+                methodMetadata.forEach((metadata: ControllerMethodMetadata) => {
+                    let paramList: ParameterMetadata[] = [];
                     if (parameterMetadata) {
                         paramList = parameterMetadata[metadata.key] || [];
                     }
 
-                    let authorizationHandler = [];
+                    const authorizationHandler = [];
                     if (authorizeAllMetadata) {
-                        let requiredRoles = authorizeAllMetadata.requiredRoles;
+                        const requiredRoles = authorizeAllMetadata.requiredRoles;
                         authorizationHandler.push(this.authorizationHandlerFactory(requiredRoles));
                     }
                     if (authorizeMetadata) {
-                        let authorizedMetadataForMethod = authorizeMetadata[metadata.key];
+                        const authorizedMetadataForMethod = authorizeMetadata[metadata.key];
                         if (authorizedMetadataForMethod !== undefined) {
-                            let requiredRoles = authorizedMetadataForMethod.requiredRoles;
+                            const requiredRoles = authorizedMetadataForMethod.requiredRoles;
                             authorizationHandler.push(this.authorizationHandlerFactory(requiredRoles));
                         }
                     }
 
-                    let handler = this.handlerFactory(controllerMetadata.target.name, metadata.key, paramList);
-                    let routeMiddleware = this.resolveMiddleware(...metadata.middleware);
-                    this._router[metadata.method](
-                        `${controllerMetadata.path}${metadata.path}`,
+                    const handler = this.handlerFactory(controllerMetadata.target.name, metadata.key, paramList);
+                    const routeMiddleware = this.resolveMiddleware(...metadata.middleware);
+
+                    (this._router as any)[metadata.method](
+                        pathJoin(controllerMetadata.path, metadata.path),
                         ...controllerMiddleware,
                         ...routeMiddleware,
                         ...authorizationHandler,
@@ -169,47 +171,46 @@ export class InversifyKoaServer {
         this._app.use(this._router.routes());
     }
 
-    private authorizationHandlerFactory(requiredRoles: string[]): interfaces.KoaRequestHandler {
-            return async (ctx: Router.RouterContext, next: () => Promise<any>) => {
-                let isAuthenticated = false;
-                let isAuthorized = false;
+    private authorizationHandlerFactory(requiredRoles: string[]): KoaRequestHandler {
+        return async (ctx: Router.RouterContext, next: () => Promise<any>) => {
+            let isAuthenticated = false;
+            let isAuthorized = false;
 
-                if (ctx.state.principal) {
-                    let principal: interfaces.Principal = ctx.state.principal;
+            if (ctx.state.principal) {
+                const principal: Principal = ctx.state.principal;
 
-                    isAuthenticated = await principal.isAuthenticated();
-                    if (isAuthenticated) {
+                isAuthenticated = await principal.isAuthenticated();
+                if (isAuthenticated) {
 
-                        isAuthorized = true;
-                        for (let requiredRole of requiredRoles) {
-                            let isInRole = await principal.isInRole(requiredRole);
-                            if (!isInRole) {
-                                isAuthorized = false;
-                            }
+                    isAuthorized = true;
+                    for (const requiredRole of requiredRoles) {
+                        const isInRole = await principal.isInRole(requiredRole);
+                        if (!isInRole) {
+                            isAuthorized = false;
                         }
                     }
                 }
+            }
 
-                if (!isAuthenticated) {
-                    ctx.throw(401);
-                } else if (!isAuthorized) {
-                    ctx.throw(403);
-                } else {
-                    return await next();
-                }
-            };
+            if (!isAuthenticated) {
+                ctx.throw(401);
+            } else if (!isAuthorized) {
+                ctx.throw(403);
+            } else {
+                return await next();
+            }
+        };
     }
 
-    private resolveMiddleware(...middleware: interfaces.Middleware[]): interfaces.KoaRequestHandler[] {
+    private resolveMiddleware(...middleware: Middleware[]): KoaRequestHandler[] {
         return middleware.map(middlewareItem => {
             if (this._container.isBound(middlewareItem)) {
 
-                type MiddlewareInstance = interfaces.KoaRequestHandler | BaseMiddleware;
+                type MiddlewareInstance = KoaRequestHandler | BaseMiddleware;
                 const middlewareInstance = this._container.get<MiddlewareInstance>(middlewareItem);
 
                 if (middlewareInstance instanceof BaseMiddleware) {
-                    const _self = this;
-                    return function(ctx: Router.RouterContext, next: () => Promise<any>) {
+                    return function (ctx: Router.RouterContext, next: () => Promise<any>) {
                         return middlewareInstance.handler(ctx, next);
                     };
                 } else {
@@ -217,17 +218,17 @@ export class InversifyKoaServer {
                 }
 
             } else {
-                return middlewareItem as interfaces.KoaRequestHandler;
+                return middlewareItem as KoaRequestHandler;
             }
         });
     }
 
-    private handlerFactory(controllerName: any, key: string,
-        parameterMetadata: interfaces.ParameterMetadata[]): interfaces.KoaRequestHandler {
+    private handlerFactory(controllerName: string, key: string,
+        parameterMetadata: ParameterMetadata[]): KoaRequestHandler {
         // this function works like another top middleware to extract and inject arguments
         return async (ctx: Router.RouterContext, next: () => Promise<any>) => {
-            let args = this.extractParameters(ctx, next, parameterMetadata);
-            let result: any = await this._container.getNamed(TYPE.Controller, controllerName)[key](...args);
+            const args = this.extractParameters(ctx, next, parameterMetadata);
+            const result = (await this._container.getNamed(TYPE.Controller, controllerName) as any)[key](...args);
 
             if (result && result instanceof Promise) {
                 // koa handle promises
@@ -239,12 +240,12 @@ export class InversifyKoaServer {
     }
 
     private extractParameters(ctx: Router.RouterContext, next: () => Promise<any>,
-        params: interfaces.ParameterMetadata[]): any[] {
-        let args = [];
+        params: ParameterMetadata[]): any[] {
+        const args = [];
         if (!params || !params.length) {
             return [ctx, next];
         }
-        for (let item of params) {
+        for (const item of params) {
 
             switch (item.type) {
                 default: args[item.index] = ctx; break; // response
@@ -264,12 +265,13 @@ export class InversifyKoaServer {
         return args;
     }
 
-    private getParam(source: any, paramType: string, name: string) {
-        let param = source[paramType] || source;
+    private getParam(source: any, paramType: string | null, name: string) {
+        const param = paramType === null ? source : source[paramType] || source;
+
         return param[name] || this.checkQueryParam(paramType, param, name);
     }
 
-    private checkQueryParam(paramType: string, param: any, name: string) {
+    private checkQueryParam(paramType: string | null, param: any, name: string) {
         if (paramType === "query") {
             return undefined;
         } if (paramType === "cookies") {
@@ -279,12 +281,12 @@ export class InversifyKoaServer {
         }
     }
 
-    private async _getCurrentPrincipal(ctx: Router.RouterContext): Promise<interfaces.Principal> {
-        if (this._AuthProvider !== undefined) {
-            const authProvider = this._container.get<interfaces.AuthProvider>(TYPE.AuthProvider);
+    private async _getCurrentPrincipal(ctx: Router.RouterContext): Promise<Principal> {
+        if (this._AuthProvider) {
+            const authProvider = this._container.get<AuthProvider>(TYPE.AuthProvider);
             return await authProvider.getPrincipal(ctx);
         } else {
-            return Promise.resolve<interfaces.Principal>({
+            return Promise.resolve<Principal>({
                 details: null,
                 isAuthenticated: () => Promise.resolve(false),
                 isInRole: (role: string) => Promise.resolve(false),

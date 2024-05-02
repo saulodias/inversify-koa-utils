@@ -1,18 +1,21 @@
 import { expect } from "chai";
-import { controller, httpMethod, params, authorizeAll, authorize } from "../src/decorators";
-import { interfaces } from "../src/interfaces";
-import { METADATA_KEY, PARAMETER_TYPE } from "../src/constants";
+import { METADATA_KEY, PARAMETER_TYPE } from "../src/constants.js";
+import { authorize, authorizeAll, controller, httpMethod, params } from "../src/decorators.js";
+import {
+    AuthorizeAllMetadata, AuthorizeMetadata, ControllerMetadata, ControllerMethodMetadata,
+    ControllerParameterMetadata, ParameterMetadata
+} from "../src/interfaces.js";
 
 describe("Unit Test: Controller Decorators", () => {
 
     it("should add controller metadata to a class when decorated with @controller", (done) => {
-        let middleware = [function() { return; }, "foo", Symbol("bar")];
-        let path = "foo";
+        const middleware = [function () { return; }, "foo", Symbol("bar")];
+        const path = "foo";
 
         @controller(path, ...middleware)
-        class TestController {}
+        class TestController { }
 
-        let controllerMetadata: interfaces.ControllerMetadata = Reflect.getMetadata("_controller", TestController);
+        const controllerMetadata: ControllerMetadata = Reflect.getMetadata("_controller", TestController);
 
         expect(controllerMetadata.middleware).eql(middleware);
         expect(controllerMetadata.path).eql(path);
@@ -22,9 +25,9 @@ describe("Unit Test: Controller Decorators", () => {
 
 
     it("should add method metadata to a class when decorated with @httpMethod", (done) => {
-        let middleware = [function() { return; }, "bar", Symbol("baz")];
-        let path = "foo";
-        let method = "get";
+        const middleware = [function () { return; }, "bar", Symbol("baz")];
+        const path = "foo";
+        const method = "get";
 
         class TestController {
             @httpMethod(method, path, ...middleware)
@@ -37,11 +40,11 @@ describe("Unit Test: Controller Decorators", () => {
             public test3() { return; }
         }
 
-        let methodMetadata: interfaces.ControllerMethodMetadata[] = Reflect.getMetadata("_controller-method", TestController);
+        const methodMetadata: ControllerMethodMetadata[] = Reflect.getMetadata("_controller-method", TestController);
 
         expect(methodMetadata.length).eql(3);
 
-        let metadata: interfaces.ControllerMethodMetadata = methodMetadata[0];
+        const metadata: ControllerMethodMetadata = methodMetadata[0];
 
         expect(metadata.middleware).eql(middleware);
         expect(metadata.path).eql(path);
@@ -52,41 +55,41 @@ describe("Unit Test: Controller Decorators", () => {
     });
 
     it("should add parameter metadata to a class when decorated with @params", (done) => {
-        let middleware = [function() { return; }, "bar", Symbol("baz")];
-        let path = "foo";
-        let method = "get";
-        let methodName = "test";
+        const middleware = [function () { return; }, "bar", Symbol("baz")];
+        const path = "foo";
+        const method = "get";
+        const methodName = "test";
 
         class TestController {
             @httpMethod(method, path, ...middleware)
             public test(@params(PARAMETER_TYPE.PARAMS, "id") id: any, @params(PARAMETER_TYPE.PARAMS, "cat") cat: any) { return; }
 
             @httpMethod("foo", "bar")
-            public test2(@params(PARAMETER_TYPE.PARAMS, "dog")dog: any) { return; }
+            public test2(@params(PARAMETER_TYPE.PARAMS, "dog") dog: any) { return; }
 
             @httpMethod("bar", "foo")
             public test3() { return; }
         }
-        let methodMetadataList: interfaces.ControllerParameterMetadata =
-        Reflect.getMetadata(METADATA_KEY.controllerParameter, TestController);
-        expect(methodMetadataList.hasOwnProperty("test")).to.eqls(true);
+        const methodMetadataList: ControllerParameterMetadata =
+            Reflect.getMetadata(METADATA_KEY.controllerParameter, TestController);
+        expect(Object.prototype.hasOwnProperty.call(methodMetadataList, "test")).to.eqls(true);
 
-        let paramaterMetadataList: interfaces.ParameterMetadata[] = methodMetadataList[methodName];
+        const paramaterMetadataList: ParameterMetadata[] = methodMetadataList[methodName];
         expect(paramaterMetadataList.length).eql(2);
 
-        let paramaterMetadata: interfaces.ParameterMetadata = paramaterMetadataList[0];
+        const paramaterMetadata: ParameterMetadata = paramaterMetadataList[0];
         expect(paramaterMetadata.index).eql(0);
         expect(paramaterMetadata.parameterName).eql("id");
         done();
     });
 
     it("should add authorize metadata to a class when decorated with @authorizeAll", (done) => {
-        let requiredRoles = ["role a", "role b"];
+        const requiredRoles = ["role a", "role b"];
 
         @authorizeAll(...requiredRoles)
-        class TestController {}
+        class TestController { }
 
-        let authorizeAllMetadata: interfaces.AuthorizeAllMetadata = Reflect.getMetadata("_authorize-all", TestController);
+        const authorizeAllMetadata: AuthorizeAllMetadata = Reflect.getMetadata("_authorize-all", TestController);
 
         expect(authorizeAllMetadata.requiredRoles).eql(requiredRoles);
         expect(authorizeAllMetadata.target).eql(TestController);
@@ -95,7 +98,7 @@ describe("Unit Test: Controller Decorators", () => {
 
 
     it("should add authorize metadata to a class when decorated with @authorize", (done) => {
-        let requiredRoles = ["role a", "role b"];
+        const requiredRoles = ["role a", "role b"];
 
         class TestController {
             @authorize(...requiredRoles)
@@ -108,11 +111,11 @@ describe("Unit Test: Controller Decorators", () => {
             public test3() { return; }
         }
 
-        let authorizeMetadata: interfaces.AuthorizeMetadata[] | any = Reflect.getMetadata("_authorize", TestController);
+        const authorizeMetadata: Record<string, AuthorizeMetadata> = Reflect.getMetadata("_authorize", TestController);
 
         expect(Object.keys(authorizeMetadata).length).eql(3);
 
-        let metadata: interfaces.AuthorizeMetadata = authorizeMetadata.test;
+        const metadata: AuthorizeMetadata = authorizeMetadata.test;
 
         expect(metadata.requiredRoles).eql(requiredRoles);
         expect(metadata.target.constructor).eql(TestController);
